@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="PracticaLNModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="Bitacora">
+    <Key>
+      <PropertyRef Name="Codigo" />
+    </Key>
+    <Property Name="Codigo" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Descripcion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="FechaHora" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="CodigoCotizacion" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="Cotizacion" Relationship="Self.FK_Bitacora_Cotizacion" FromRole="Bitacora" ToRole="Cotizacion" />
+  </EntityType>
+  <EntityType Name="Cotizacion">
+    <Key>
+      <PropertyRef Name="Codigo" />
+    </Key>
+    <Property Name="Codigo" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Matricula" Type="String" MaxLength="6" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Porcentaje" Type="Int32" Nullable="false" />
+    <Property Name="PrecioFinal" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+    <NavigationProperty Name="Bitacora" Relationship="Self.FK_Bitacora_Cotizacion" FromRole="Cotizacion" ToRole="Bitacora" />
+    <NavigationProperty Name="Vehiculos" Relationship="Self.FK_Cotizacion_Vehiculos" FromRole="Cotizacion" ToRole="Vehiculos" />
+  </EntityType>
+  <EntityType Name="Vehiculos">
+    <Key>
+      <PropertyRef Name="Matricula" />
+    </Key>
+    <Property Name="Matricula" Type="String" MaxLength="6" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="PrecioInicial" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+    <Property Name="Fabricacion" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="Cotizacion" Relationship="Self.FK_Cotizacion_Vehiculos" FromRole="Vehiculos" ToRole="Cotizacion" />
+  </EntityType>
+  <Association Name="FK_Bitacora_Cotizacion">
+    <End Role="Cotizacion" Type="Self.Cotizacion" Multiplicity="1" />
+    <End Role="Bitacora" Type="Self.Bitacora" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Cotizacion">
+        <PropertyRef Name="Codigo" />
+      </Principal>
+      <Dependent Role="Bitacora">
+        <PropertyRef Name="CodigoCotizacion" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Cotizacion_Vehiculos">
+    <End Role="Vehiculos" Type="Self.Vehiculos" Multiplicity="1" />
+    <End Role="Cotizacion" Type="Self.Cotizacion" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Vehiculos">
+        <PropertyRef Name="Matricula" />
+      </Principal>
+      <Dependent Role="Cotizacion">
+        <PropertyRef Name="Matricula" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="PracticaLNEntities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="Bitacora" EntityType="Self.Bitacora" />
+    <EntitySet Name="Cotizacion" EntityType="Self.Cotizacion" />
+    <EntitySet Name="Vehiculos" EntityType="Self.Vehiculos" />
+    <AssociationSet Name="FK_Bitacora_Cotizacion" Association="Self.FK_Bitacora_Cotizacion">
+      <End Role="Cotizacion" EntitySet="Cotizacion" />
+      <End Role="Bitacora" EntitySet="Bitacora" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Cotizacion_Vehiculos" Association="Self.FK_Cotizacion_Vehiculos">
+      <End Role="Vehiculos" EntitySet="Vehiculos" />
+      <End Role="Cotizacion" EntitySet="Cotizacion" />
+    </AssociationSet>
+    <FunctionImport Name="ConsultarVehiculos" ReturnType="Collection(PracticaLNModel.ConsultarVehiculos_Result)">
+      <Parameter Name="Matricula" Mode="In" Type="String" />
+      <Parameter Name="PrecioInicial" Mode="In" Type="Decimal" />
+      <Parameter Name="Fabricacion" Mode="In" Type="Int32" />
+    </FunctionImport>
+  </EntityContainer>
+  <ComplexType Name="ConsultarVehiculos_Result">
+    <Property Type="String" Name="Matricula" Nullable="false" MaxLength="6" />
+    <Property Type="Decimal" Name="PrecioInicial" Nullable="false" Precision="18" Scale="2" />
+    <Property Type="Int32" Name="Fabricacion" Nullable="false" />
+  </ComplexType>
+</Schema>
